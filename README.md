@@ -128,14 +128,13 @@ Planned work includes out-of-fold baseline maps, untouched temporal and
 station-held-out evaluation, and uncertainty analysis. These experiments are
 not presented as completed.
 
-## Project name and attribution
+## Project name
 
 **Aitken** is named in reference to John Aitken's research on atmospheric dust
 particles. His historical work provides the inspiration for the name, not a
 claim that this project implements his instruments.
 [Original research](https://doi.org/10.1017/S0080456800017592).
 
-Project by **Rajdeep Pandey**, with guidance from **Dr. Suchitra Patil**.
 Source products and their roles are documented in the
 [data-source guide](docs/DATA_SOURCES.md).
 
