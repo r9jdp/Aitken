@@ -1,0 +1,55 @@
+# Credentials and local environment
+.env
+.env.*
+!.env.example
+.cdsapirc
+*credentials*.json
+*token*.json
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+
+# Original study data and run outputs stay local. Curated copies live in results/.
+/data/*
+!/data/README.md
+/metadata/*
+!/metadata/README.md
+/models/*
+!/models/README.md
+/artifacts/*
+!/artifacts/README.md
+/logs/
+
+# Academic deck and compiled draft PDF are local until selected for a public release.
+/presentation*.pptx
+/paper/*.pdf
+/paper/*.zip
+/paper/evidence/validation.json
+/paper/MIGRATION.json
+/docs/organisation-check.json
+/docs/history/
+/presentations/slide_inventory.json
+
+# Build output and model/data binaries anywhere else
+.build/
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.pt
+*.pth
+*.pkl
+*.joblib
+*.npy
+*.npz
+*.nc
+*.tif
+*.tiff
+*.csv.gz

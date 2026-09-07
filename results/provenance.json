@@ -1,0 +1,40 @@
+{
+  "study": "Greater London PM2.5 retrospective evaluation",
+  "evaluation_station_days": 9619,
+  "evaluation_dates": 349,
+  "training_years": [
+    2021,
+    2022,
+    2023
+  ],
+  "evaluation_year": 2024,
+  "models_retrained_for_release": false,
+  "source_paths_note": "Identifiers within the local study bundle; source artifacts are not included in this documentation release.",
+  "files": [
+    {
+      "path": "results/figures/heatmap_comparison.png",
+      "sha256": "b8db2fd827813ed390337f4625e40419867e7e5897adbb9d0b47481a61327dd2",
+      "local_study_source": "artifacts/london_3year_final_comparison_20260905_145050/heatmap_comparisons/2024-07-15/unet_vs_hgb_heatmaps_2024-07-15.png",
+      "transformation": "byte-identical copy"
+    },
+    {
+      "path": "results/figures/pipeline.png",
+      "sha256": "371d75e21db6d808f6bee4eacac2f9a7c19854badf821ba08782cc5408a84f13",
+      "local_study_source": "paper/figures/pipeline.png",
+      "transformation": "byte-identical copy"
+    },
+    {
+      "path": "results/figures/rmse_comparison.png",
+      "sha256": "ac2d166e36488057936821d387d907cd587fd1ee9ead708a9e8fda21fc720782",
+      "local_study_source": "paper/figures/rmse_comparison.png",
+      "transformation": "byte-identical copy"
+    },
+    {
+      "path": "results/metrics.csv",
+      "sha256": "07dd280f2999fcadc315718b585afbbcba607c0b83a6cb5bbeca368627532c2c",
+      "local_study_source": "artifacts/london_standalone_unet_20260906/metrics.json",
+      "source_sha256": "2c1cceb56bc017509f04a88f8a8853d9acf3624917873ec6c4a6645183d24cd8",
+      "transformation": "Select the seven pre-specified model rows and MAE/RMSE/R2; preserve numeric precision"
+    }
+  ]
+}
