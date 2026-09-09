@@ -128,6 +128,22 @@ the upstream dependency resolves to an equally patched version. Never use
 
 ## Extending the project
 
+### Release / hosting status
+
+The dashboard and derived archive are committed to the user's existing Aitken
+GitHub repository. The local preview works independently of any hosted service.
+A private Sites project was registered and its ID is recorded in
+`.openai/hosting.json`, but **it has not been published**: the source upload to
+the separate hosting repository was blocked by the approval reviewer because
+the user had authorised GitHub pushes, not disclosure to that additional host.
+Obtain the user's approval for uploading the committed code and derived maps
+before attempting that publishing step again. Do not create a duplicate Site
+or assume that registration means deployment succeeded. No credentials are
+stored in the repository. The ignored `.site-build/` archive is compiled public
+output only, not an independently published service.
+
+### Adding more models or dates
+
 For more historical dates, first create and verify the required input features
 and frozen-model predictions in the research pipeline, then update the export,
 catalog and calendar checks. For genuinely new-day inference, add a separately
