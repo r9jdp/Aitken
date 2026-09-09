@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "all_input_hashes_still_unchanged": true,
+  "backbone_and_helpers_match_original_source": true,
+  "paired_initialisation_verified": true,
+  "evaluation_observations_match_original_station_archive": true,
+  "selection_gate_independently_recomputed": true,
+  "trials": [
+    {
+      "family": "standalone",
+      "treatment": "control",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "standalone",
+      "treatment": "cap_995",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "standalone",
+      "treatment": "cap_990",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "hybrid",
+      "treatment": "control",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "hybrid",
+      "treatment": "cap_995",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "hybrid",
+      "treatment": "cap_990",
+      "rows": 11102,
+      "high_rows": 264,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "map_station_alignment": true
+    },
+    {
+      "family": "standalone",
+      "phase": "2024_confirmation",
+      "identical_observations": true,
+      "checkpoint_verified": true,
+      "metrics_recomputed": true,
+      "prediction_freeze_verified": true,
+      "map_station_alignment": true
+    }
+  ]
+}

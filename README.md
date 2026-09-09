@@ -16,6 +16,13 @@ yet been demonstrated.
 [Data sources](docs/DATA_SOURCES.md) · [Research protocol](docs/RESEARCH_PROTOCOL.md) ·
 [Results](results/README.md) · [Dashboard setup](dashboard/README.md) · [Roadmap](ROADMAP.md)
 
+A separate [training-target capping experiment](experiments/outlier_sensitivity/README.md)
+tests small preprocessing changes without replacing the published model comparison
+or dashboard. It requires read-only access to the original local training data.
+The [completed capping report](results/outlier_sensitivity_20260909/REPORT.md)
+recommends keeping the existing models: the standalone validation gain did not
+carry over to 2024, and neither hybrid cap passed validation.
+
 ## Interactive dashboard
 
 Choose any date in **2024** and a model to render its saved London heatmap.

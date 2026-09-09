@@ -1,6 +1,6 @@
 # Training-target capping sensitivity test
 
-Small, pre-registered experiment for the London standalone and hybrid U-Nets.
+Small, pre-specified experiment for the London standalone and hybrid U-Nets.
 This is **not** a declaration that high pollution readings are measurement errors.
 PM2.5 >=25 µg/m³ is a diagnostic group, not AQI and not an automatic rejection rule.
 
@@ -68,5 +68,16 @@ updated. Publish only code/tests, provenance, aggregate reports and selected fig
 its cap/affected count, uncapped preprocessing, checkpoint, daily metrics and
 station predictions. `input_integrity.json` proves read-only source files match.
 Results must include unsuccessful treatments; no threshold search using 2024.
+
+After completion, independently audit and render the public aggregate report:
+
+```powershell
+python experiments/outlier_sensitivity/audit_run.py --run-dir artifacts/outlier_sensitivity_20260909 --reference-bundle ../code/pm25_london_bundle --output results/outlier_sensitivity_20260909/audit.json
+python experiments/outlier_sensitivity/publish_report.py --run-dir artifacts/outlier_sensitivity_20260909 --output-dir results/outlier_sensitivity_20260909
+```
+
+The audit rechecks source hashes, unchanged copied helper/backbone ASTs, paired
+initialisation, checkpoint hashes, every screening metric, station-to-map alignment
+and the selection gate. Inspect the rendered PNG before committing the report.
 
 Reference: [SciPy winsorisation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.mstats.winsorize.html).
