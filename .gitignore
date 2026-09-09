@@ -53,3 +53,8 @@ Thumbs.db
 *.tif
 *.tiff
 *.csv.gz
+
+# Reproducible dashboard outputs (curated public/data grids are tracked).
+/dist/
+/.site-build/
+*.tsbuildinfo
