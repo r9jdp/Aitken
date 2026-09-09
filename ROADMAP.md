@@ -12,6 +12,10 @@ distinct from material that has been published here.
 
 ## Code and reproducibility release
 
+- [x] Interactive seven-model benchmark and date-selectable 2024 heatmap dashboard.
+- [x] Derived map export with file hashes, calendar tests and aggregate-score checks.
+- [x] Dashboard-specific dependency lockfile, setup and handover documentation.
+
 - [ ] Import acquisition and preprocessing code with its supporting modules.
 - [ ] Import HGB, XGBoost and ANN workflows.
 - [ ] Import hybrid and standalone U-Net training and evaluation workflows.

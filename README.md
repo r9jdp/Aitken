@@ -7,13 +7,33 @@ weather and geographic data to estimate daily PM2.5 on a 1 km grid. The current
 case study covers **Greater London, 2021–2024** and compares gradient-boosted
 trees, an ANN, a hybrid HGB + residual U-Net and a standalone U-Net.
 
-**Status:** initial documentation release. The reported experiments are complete;
-training code, data-access tooling and the manuscript are planned for later
+**Status:** research documentation and an executable dashboard. The reported
+experiments are complete; the dashboard explores saved outputs without retraining.
+Training code, data-access tooling and the manuscript are planned for later
 releases. Generalisation to other cities and operational forecasting have not
 yet been demonstrated.
 
 [Data sources](docs/DATA_SOURCES.md) · [Research protocol](docs/RESEARCH_PROTOCOL.md) ·
-[Results](results/README.md) · [Roadmap](ROADMAP.md)
+[Results](results/README.md) · [Dashboard setup](dashboard/README.md) · [Roadmap](ROADMAP.md)
+
+## Interactive dashboard
+
+Choose any date in **2024** and a model to render its saved London heatmap.
+Compare all seven model results, inspect daily monitoring-site error, change
+colour scales, outline relative hotspots and download a labelled PNG.
+
+Requires Node.js 22.18 or newer; no Python, GPU or training data is needed to run it.
+From this repository:
+
+```powershell
+npm --prefix dashboard ci
+npm --prefix dashboard run dev
+```
+
+Open the local address printed by the command. See [dashboard documentation](dashboard/README.md)
+for production builds and [technical handover](docs/DASHBOARD.md) for the data contract.
+Five model variants have full-grid maps. ANN and XGBoost currently have scores
+only. This is a **retrospective prediction archive, not a live forecasting service**.
 
 ![Baseline, hybrid prediction, correction and regulatory observations for 15 July 2024](results/figures/heatmap_comparison.png)
 
@@ -28,8 +48,8 @@ observations?
 
 The completed local study includes data preparation, source-aware supervision,
 baseline and neural model comparisons, spatial maps, saved-artifact audits and
-a draft manuscript. This repository initially presents its research scope and
-aggregate results.
+a draft manuscript. This repository presents its research scope, aggregate
+results and a runnable prediction-archive dashboard.
 
 ## Study at a glance
 
@@ -97,6 +117,8 @@ Aitken/
     provenance.json            Published-file hashes and source identifiers
     figures/                   Maps, pipeline and RMSE comparison
   ROADMAP.md                   Code, manuscript and research release stages
+  dashboard/                   React dashboard, tests and derived map archive
+  scripts/                     Saved-output exporter and static-build staging
 ```
 
 ## Code, data and paper availability
@@ -105,14 +127,15 @@ Aitken/
 |---|---|
 | Project documentation and selected figures | Included in this repository |
 | Aggregate evaluation metrics | Included in `results/metrics.csv` |
+| Dashboard and derived 2024 map archive | Included in `dashboard/` |
 | Acquisition, preparation and model code | Completed locally; public release planned |
 | Raw/processed data and checkpoints | Not distributed in this release |
 | Manuscript | Unpublished draft; public release planned |
 | Presentation | Public research edition planned |
 
-This initial version is intended to explain and document the study. It is not
-an executable training package. Setup commands will accompany the code release
-after verification in a clean environment. See the [roadmap](ROADMAP.md).
+The dashboard runs independently from the original London bundle. This is still
+not an executable training package: acquisition, feature preparation and model
+training remain in the separate local bundle. See the [roadmap](ROADMAP.md).
 
 The earlier synthetic-data prototype is a separate development stage. Its
 results are not used as evidence for this London study.
