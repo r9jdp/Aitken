@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "input_hashes_unchanged": {
+    "results/metrics.csv": "07dd280f2999fcadc315718b585afbbcba607c0b83a6cb5bbeca368627532c2c",
+    "docs/RESEARCH_PROTOCOL.md": "088628e583393676dca66bb32be149a246f4ff8d5df4d44773793b1f09d1a2e7",
+    "results/outlier_sensitivity_20260909/results.json": "91e687f4206b16e7c00aa88ce582bd2a370fbdf191eacbc5964967bf4cd2323e",
+    "results/outlier_sensitivity_20260909/audit.json": "1b28170d40bc908ccd3ff821cba24fc01ca94cc109a72b0c7e31f2860c636528",
+    "comparison/evidence/high_pollution_diagnosis.json": "2946edfe8cc5b241212aafa88ecfb2743177d35fc019ff71ad94197395ea4dd5",
+    "comparison/sources.json": "92d083b185c04b969500a6866814f3b16bbbdfd426e6f2915a79c741ea7818a9"
+  },
+  "input_hash_method": "SHA-256 with CRLF normalised to LF for tracked text inputs; original prediction gzip uses byte-exact SHA-256 in the diagnosis",
+  "generated": [
+    "London_PM25_Comparison_and_Error_Analysis.docx",
+    "REPORT.md",
+    "figures/error_concentration.png"
+  ],
+  "training_performed": false,
+  "observations_modified": false,
+  "dashboard_presentation_and_product_table_modified": false,
+  "output_scope": "Aitken/comparison only",
+  "primary_references": 10,
+  "note": "Rendering and visual review are recorded separately in REVIEW.md."
+}
