@@ -23,6 +23,12 @@ The [completed capping report](results/outlier_sensitivity_20260909/REPORT.md)
 recommends keeping the existing models: the standalone validation gain did not
 carry over to 2024, and neither hybrid cap passed validation.
 
+A separate [temporal hybrid experiment](experiments/temporal_model/README.md)
+added five past-only rolling and trend features to the HGB + residual U-Net
+hybrid. Its [2024 retrospective result](results/temporal_model_20260912/REPORT.md)
+improved R² from 0.5166 to 0.5201 against a freshly trained matched control,
+while the existing published hybrid remains the official model.
+
 ## Interactive dashboard
 
 Choose any date in **2024** and a model to render its saved London heatmap.

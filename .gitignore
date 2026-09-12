@@ -17,6 +17,7 @@ Thumbs.db
 # Original study data and run outputs stay local. Curated copies live in results/.
 /data/*
 !/data/README.md
+/pm25_london_bundle/
 /metadata/*
 !/metadata/README.md
 /models/*

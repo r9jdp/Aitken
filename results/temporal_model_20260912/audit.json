@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "station_rows": 9619,
+  "labelled_dates": 349,
+  "same_rows_for_both_models": true,
+  "source_inputs_unchanged": true,
+  "selection_used_2024": false,
+  "records": [
+    {
+      "variant": "A_current_hybrid",
+      "metrics_recomputed": true,
+      "checkpoints": [
+        {
+          "seed": 42,
+          "sha256": "73cd9dc7d1ec4728fa01cb469fac425dc74006f675c0ec63d622a1b6e6f23a0e"
+        },
+        {
+          "seed": 11,
+          "sha256": "ce42549a30ace0738b4e96787bc713c229fde80e895f0b134f840a3bec57dde0"
+        },
+        {
+          "seed": 22,
+          "sha256": "315bfcf7ad36a162ca047ff5cfc9d823c47785ab8e82a850c33f9c5af0349d9c"
+        }
+      ]
+    },
+    {
+      "variant": "B_temporal",
+      "metrics_recomputed": true,
+      "checkpoints": [
+        {
+          "seed": 42,
+          "sha256": "73c6b711f16a903e5a62a85e6d86a53c4b6ad1c3e44a9eb756718b23ee96ba1f"
+        },
+        {
+          "seed": 11,
+          "sha256": "3763915dc9eb1d9f88d74855ed38757063ebe3d981b3188fdab9eaeae5f13cda"
+        },
+        {
+          "seed": 22,
+          "sha256": "870f95de8a085a67f66e3666cb8e2ab5359eb2e53696acad76d4e8ca193e16cb"
+        }
+      ]
+    }
+  ]
+}

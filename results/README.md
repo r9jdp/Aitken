@@ -9,6 +9,9 @@ completed local London study. No models were retrained for this release.
   SHA-256 hashes for the published files.
 - [Evaluation protocol](../docs/RESEARCH_PROTOCOL.md): fitting periods,
   retrospective status, uncertainty interpretation and limitations.
+- [Temporal hybrid experiment](temporal_model_20260912/REPORT.md): the current
+  hybrid and temporal-feature version were trained on 2021–2023 and compared on
+  the same 2024 LAQN rows, with an independent saved-output audit.
 
 The aggregate metrics were checked against the locally saved station-level
 predictions. Station-level observations and predictions, model checkpoints,
