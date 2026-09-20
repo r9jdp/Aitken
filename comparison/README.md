@@ -7,6 +7,8 @@ Report date: **12 September 2026**. This folder documents the existing product; 
 - [Recomputed error evidence](evidence/high_pollution_diagnosis.json)
 - [Published sources and table locators](sources.json)
 - [Report review and limitations](REVIEW.md)
+- [Peak-preserving temporal sensitivity experiment](temporal_peak_sensitivity/REPORT.md)
+  — separate controlled follow-up; original report and product are unchanged.
 
 ## Main findings
 

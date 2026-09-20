@@ -29,6 +29,12 @@ hybrid. Its [2024 retrospective result](results/temporal_model_20260912/REPORT.m
 improved R² from 0.5166 to 0.5201 against a freshly trained matched control,
 while the existing published hybrid remains the official model.
 
+A separate [peak-preserving temporal sensitivity experiment](experiments/temporal_peak_sensitivity/README.md)
+tests exponential/median history features and a loss on final concentration
+predictions. Its [research and results report](comparison/temporal_peak_sensitivity/REPORT.md)
+keeps the original observations and archived HGB maps unchanged; it does not
+replace the official models or dashboard.
+
 ## Interactive dashboard
 
 Choose any date in **2024** and a model to render its saved London heatmap.

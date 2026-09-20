@@ -1,0 +1,113 @@
+{
+  "status": "passed",
+  "reason": "Restore validated float32 CSV round-trip precision in memory; frozen metric checks unchanged",
+  "source_run": "artifacts\\temporal_peak_sensitivity\\run_20260920_v2",
+  "summary_sha256": "cdbcd272224557346c6999c4c1585bd8705b719dd3d684eb21eb198231bf7594",
+  "manifest_sha256": "144ce225bb6dbbced93208d8bb3e082fc2dbd523bebd86b86d57c9300ec8542c",
+  "independent_audit_sha256": "5f827f344e1659f350efbdc403949516853ac91a5fc83397db655d0ea3cc6640",
+  "station_source_sha256": "48d49d025c70e11816c7965b6a0fc77ca1d16094ee3a8e5a8ed581afef0f1fa6",
+  "renderer_sha256": "f8d775fc8a5fc98d6a7040776df865c655f7b8b4e03d68ab01d5c8449db53364",
+  "reads": {
+    "screening\\predictions\\standalone_control.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "c539ed395e22414b84aa6a0ab3b73212ec475500cc2213b39ac2714dd164fc53",
+      "map_path": "screening\\predictions\\standalone_control_maps.npy",
+      "map_sha256": "26358e06d433cc8307ab1ed5a6386fe351ac72e2a0354abc7d768b438942eea7"
+    },
+    "screening\\predictions\\standalone_ewma.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "e97633498db62213b94f12b33935fec7f27de3efabe9afd24231dbcb2a40adc7",
+      "map_path": "screening\\predictions\\standalone_ewma_maps.npy",
+      "map_sha256": "0d7be78588e36cb5c268ed1b422cbd589f55b9a9922ad6d8158ddac680542d35"
+    },
+    "screening\\predictions\\standalone_median.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "db015b3ea4433c6ad6b8e57e6915ae134d2439d0b80c74b89fd8a210fbece553",
+      "map_path": "screening\\predictions\\standalone_median_maps.npy",
+      "map_sha256": "5924dce610a706cccb84ed3e44e82112ead8e1ab615f2b0b37011a86083a965b"
+    },
+    "screening\\predictions\\standalone_final_loss.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "71ec4c791fbfeaff4b3b428477800b6fb371d97ab9ca41769b68f8566d4890c6",
+      "map_path": "screening\\predictions\\standalone_final_loss_maps.npy",
+      "map_sha256": "4a92367b8f32fea4ae317f27bb233790f21f8059d01fccbfeabbf33cb2cddb75"
+    },
+    "screening\\predictions\\hybrid_original_control.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "526052acbcb9fe6203e6a8ed9f4412b1ddb611a1e19f518c07d42446f2b32564",
+      "map_path": "screening\\predictions\\hybrid_original_control_maps.npy",
+      "map_sha256": "44e76f8486780c19b31c819c257e2d84b2e7965163667be7c41c49cc95c6ba9b"
+    },
+    "screening\\predictions\\hybrid_temporal_control.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "71e86dd8493b7785cc0496d19736dbba88698b213a4b6ebaa6d11a26b5d0c9df",
+      "map_path": "screening\\predictions\\hybrid_temporal_control_maps.npy",
+      "map_sha256": "2f4dbb0ace3583ad7557aa67bbaa2c72cbd15dae482bea10c6ceec31ab608fad"
+    },
+    "screening\\predictions\\hybrid_ewma.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "9f04be18cb564e13132072764d8b1a1e323cea866e6b8918b689a0b3159d33d9",
+      "map_path": "screening\\predictions\\hybrid_ewma_maps.npy",
+      "map_sha256": "5e65d0174515423d05da4a7b98a4d7e78fea49d27f051b4932426a9114dab5c6"
+    },
+    "screening\\predictions\\hybrid_median.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "ae0dadc479ded34d63b4171c5cde6600ef166de00c9f62c0f3d3dda387e269da",
+      "map_path": "screening\\predictions\\hybrid_median_maps.npy",
+      "map_sha256": "416b522e668a9eea40c4789261ce14934a4fbd9d4f87cdf740df6bb710cb1cd1"
+    },
+    "screening\\predictions\\hybrid_final_loss.csv.gz": {
+      "rows": 11102,
+      "keys_and_order_exact": true,
+      "maximum_observed_csv_roundtrip_error": 1.5258789076710855e-06,
+      "maximum_predicted_csv_roundtrip_error": 7.105427357601002e-15,
+      "relative_tolerance": 1e-07,
+      "absolute_tolerance": 1e-07,
+      "csv_sha256": "48eb11785b5425025dfb7b676e2f045dc2d31ec29821b631c488749d72ec2d05",
+      "map_path": "screening\\predictions\\hybrid_final_loss_maps.npy",
+      "map_sha256": "e314269fec4611528d84d7e03dabe5b727ee81ef4acd3e8857498ed1d8fbec8e"
+    }
+  },
+  "source_files_modified": false,
+  "bootstrap_note": "Any final intervals rendered here use restored exact numeric values; runner summary intervals use CSV round-trip precision. Differences at rounding scale are not new model results."
+}
