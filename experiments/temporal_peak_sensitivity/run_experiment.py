@@ -129,12 +129,14 @@ class Budget:
     resumed partial epoch restarts from its last complete checkpoint, but all
     previously consumed compute remains charged. One batch is the stop latency.
     """
-    def __init__(self, path, seconds):
+    def __init__(self, path, seconds, initial_used=0.):
         self.path = output_path(path)
         self.limit = min(float(seconds), 7200.)
         if not 0 < self.limit <= 7200:
             raise ValueError("Budget must be positive and at most two GPU-hours")
-        self.used = 0.
+        self.used = float(initial_used)
+        if not np.isfinite(self.used) or self.used < 0:
+            raise ValueError("Invalid carried-forward compute time")
         if self.path.exists():
             old = json.loads(self.path.read_text())
             if old["limit_seconds"] != self.limit:
@@ -214,6 +216,24 @@ def init_hashes(model, base_names, full_names):
         else:
             common[name] = array_hash(value)
     return dict(common_parameter_hash=digest_json(common), added_channels_zero=all(added.values()))
+
+
+def optimizer_step(model, optimizer, amp):
+    """Preserve GradScaler's normal overflow/skip handling during warmup.
+
+    unscale_ records nonfinite gradients BEFORE clipping. The scaler then skips
+    that optimizer update and reduces its scale, preserving finite parameters.
+    Raising on the gradient norm would prevent this inherited AMP behavior.
+    """
+    amp.unscale_(optimizer)
+    norm = torch.nn.utils.clip_grad_norm_(model.parameters(), 5., error_if_nonfinite=False)
+    if not amp.is_enabled() and not torch.isfinite(norm):
+        raise ValueError("Nonfinite gradient without an active loss scaler")
+    scale = amp.get_scale()
+    amp.step(optimizer)
+    amp.update()
+    optimizer.zero_grad(set_to_none=True)
+    return amp.get_scale() < scale
 
 
 def run_member(ctx, phase, name, seed):
@@ -314,6 +334,7 @@ def train_member(ctx, out, name, seed, contract, contract_data, prep, extra,
         budget.begin()
         started = time.monotonic()
         total = 0.
+        skipped_updates = 0
         try:
             for group in optimizer.param_groups:
                 group["lr"] = schedule[epoch-1]
@@ -334,11 +355,7 @@ def train_member(ctx, out, name, seed, contract, contract_data, prep, extra,
                 amp.scale(loss/divisor).backward()
                 total += float(loss.detach())
                 if (index+1) % 2 == 0 or index+1 == len(loader):
-                    amp.unscale_(optimizer)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 5., error_if_nonfinite=True)
-                    amp.step(optimizer)
-                    amp.update()
-                    optimizer.zero_grad(set_to_none=True)
+                    skipped_updates += int(optimizer_step(model, optimizer, amp))
                     with torch.no_grad():
                         for averaged, current in zip(ema.parameters(), model.parameters()):
                             averaged.lerp_(current, .02)
@@ -348,7 +365,7 @@ def train_member(ctx, out, name, seed, contract, contract_data, prep, extra,
         finally:
             budget.end()
         history.append(dict(epoch=epoch, lr=schedule[epoch-1], loss=total/len(loader),
-                            seconds=time.monotonic()-started))
+                            seconds=time.monotonic()-started, amp_skipped_updates=skipped_updates))
         snapshot(epoch)
         save_json(out / "history.json", history)
         log(f"  {name}/{seed} {epoch}/{len(schedule)} loss={total/len(loader):.5f}")
@@ -476,6 +493,14 @@ def setup(args):
         feature_semantics="prepared standardized/clipped lag-1 input; no extra shift; per-pixel causal filters",
         training_limit_seconds=min(args.gpu_hours*3600, 7200.),
         gate="RMSE and high MAE strictly lower; MAE and normal MAE nonincreased; abs normal bias <= max(.1,abs control)")
+    carried = 0.
+    prior_budget = getattr(args, "prior_budget", None)
+    if prior_budget:
+        prior = output_path(prior_budget)
+        if prior.is_relative_to(out):
+            raise ValueError("Prior budget must belong to a different, stopped run")
+        carried = float(json.loads(prior.read_text())["used_seconds"])
+        manifest["prior_budget"] = dict(path=str(prior), sha256=sha256(prior), used_seconds=carried)
     freeze_json(out / "manifest.json", manifest)
     features = np.load(data / "features_float16.npy", mmap_mode="r")
     raw = np.load(data / "target_pm25.npy", mmap_mode="r")
@@ -493,7 +518,7 @@ def setup(args):
                    temporal_control_note="Friend's five-channel recipe rebased on archived fixed HGB and paired initialization; not a numerical reproduction of the friend's refitted-HGB run")
     ctx = dict(out=out, data=data, reference=reference, features=features, protocol=protocol,
                prepared={}, extras={}, manifest_digest=digest_json(manifest), before=before,
-               budget=Budget(out / "budget.json", args.gpu_hours*3600), summary=summary)
+               budget=Budget(out / "budget.json", args.gpu_hours*3600, carried), summary=summary)
     # Preparation for final training is intentionally deferred until validation gates pass.
     ctx.update(metadata=metadata, raw=raw, weights=weights, mask=mask, history=history)
     prepare_phase(ctx, "selection")
@@ -609,4 +634,5 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--gpu-hours", type=float, default=2.)
     parser.add_argument("--check-only", action="store_true")
+    parser.add_argument("--prior-budget", help="Carry compute charged to a stopped, superseded run; no checkpoint reuse")
     execute(parser.parse_args())

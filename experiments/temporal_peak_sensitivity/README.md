@@ -85,6 +85,11 @@ including consumed partial epochs. Setup, hashing, report generation and CPU
 tests are separate. The stop latency is at most the currently running batch;
 partial epochs restart from their last complete checkpoint with prior compute
 still charged. No automatic extension beyond two GPU-hours is allowed.
+If a code fix requires a new run directory after an interrupted preflight/fit,
+`--prior-budget path/to/old/run/budget.json` carries consumed compute into the
+new run without relaxing checkpoint contracts or reusing incompatible weights.
+AMP gradient overflows use the original GradScaler skip/backoff behavior; the
+number of skipped optimizer updates is recorded in each epoch history.
 
 ## Outputs
 

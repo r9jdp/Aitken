@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 import numpy as np
+import torch
 
 from experiments.temporal_peak_sensitivity import run_experiment as runner
 
@@ -19,6 +20,27 @@ class LocalFixtureTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory(prefix="unit_", dir=runner.ARTIFACT_ROOT)
         self.addCleanup(self.temporary.cleanup)
         self.folder = Path(self.temporary.name)
+
+    def test_superseded_run_compute_is_carried_forward(self):
+        budget = runner.Budget(self.folder / "budget.json", 7200, initial_used=4.5)
+        self.assertEqual(budget.used, 4.5)
+        runner.save_json(budget.path, {**budget.record(), "used_seconds": 7.5})
+        resumed = runner.Budget(budget.path, 7200, initial_used=4.5)
+        self.assertEqual(resumed.used, 7.5)
+
+    @unittest.skipUnless(torch.cuda.is_available(), "CUDA AMP regression test")
+    def test_amp_overflow_skips_update_without_corrupting_parameters(self):
+        model = torch.nn.Linear(1, 1).cuda()
+        before = [p.detach().clone() for p in model.parameters()]
+        optimizer = torch.optim.AdamW(model.parameters(), lr=3e-4)
+        amp = torch.amp.GradScaler("cuda")
+        with torch.amp.autocast("cuda"):
+            value = model(torch.ones(2, 1, device="cuda")).float().sum() * 1e20
+        amp.scale(value).backward()
+        self.assertTrue(runner.optimizer_step(model, optimizer, amp))
+        for old, new in zip(before, model.parameters()):
+            self.assertTrue(torch.isfinite(new).all())
+            torch.testing.assert_close(old, new, rtol=0, atol=0)
 
     def test_output_scope_rejects_roots_outside_and_traversal(self):
         self.assertEqual(runner.output_path(self.folder / "run" / "metrics.json"),
