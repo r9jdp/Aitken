@@ -16,6 +16,27 @@ use no synthetic PM2.5 training labels.
 | London Atmospheric Emissions Inventory 2022 | Emissions covariates | [London Datastore](https://data.london.gov.uk/) |
 | Greater London boundary | Study-domain mask | [London Datastore](https://data.london.gov.uk/) |
 
+## External-information follow-up
+
+The 30 September 2026 experiment separately tested regional PM2.5 from the
+[DEFRA AURN](https://uk-air.defra.gov.uk/data/). It used only background/rural
+sites 30-110 km from central London and did not add the London evaluation
+stations as predictors. The selected same-day signal improved the saved
+temporal hybrid on the retrospective 2024 benchmark; see the
+[experiment report](../results/external_features_aurn_20260930/REPORT.md).
+
+Other candidate sources are tracked separately so that each can be evaluated
+alone: [CAMS European air-quality reanalysis](https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses?tab=overview),
+[MODIS MAIAC aerosol optical depth](https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES),
+and [NOAA HYSPLIT](https://www.ready.noaa.gov/HYSPLIT.php). CAMS and MAIAC need
+user data-service credentials that are not stored in this repository. HYSPLIT
+also needs a local trajectory and meteorology setup.
+
+The public DfT London raw-count file was downloaded and audited, but rejected
+as a daily time-series feature. It contains occasional manual survey dates, not
+continuous daily traffic: only 92-105 distinct dates per year during 2021-2024.
+Interpolating across those gaps would manufacture most of the intended signal.
+
 NASA FIRMS fire data were investigated during development. Five fire/smoke
 channels were excluded from the final 66-feature models.
 
@@ -42,7 +63,8 @@ selected figures. Raw observations, prepared arrays, station-level prediction
 tables and checkpoints are not included. Some acquisition workflows require
 provider accounts or API credentials.
 
-Acquisition/preparation scripts and a fuller data-access guide are planned
-for a subsequent code release. Redistribution permissions and attribution
-requirements will be reviewed before publishing any downloadable data sample.
-Provider access does not automatically grant redistribution rights.
+Most original acquisition/preparation scripts and a fuller data-access guide
+are planned for a subsequent code release. The external AURN follow-up includes
+its downloader and quality-control code now. Redistribution permissions and
+attribution requirements will be reviewed before publishing any downloadable
+data sample. Provider access does not automatically grant redistribution rights.

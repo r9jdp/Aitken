@@ -1,0 +1,30 @@
+{
+  "evaluation_rows": 9619,
+  "evaluation_dates": 349,
+  "selection_period": "2023",
+  "evaluation_period": "2024",
+  "aurn": {
+    "selected_sites": 18,
+    "usable_sites": 15,
+    "usable_station_days": 16413,
+    "all_1461_study_dates_have_at_least_one_valid_site": true,
+    "same_day_status": "evaluated",
+    "lag1_status": "rejected_on_2023"
+  },
+  "dft_traffic": {
+    "status": "rejected_as_daily_feature",
+    "unique_dates": {
+      "2021": 103,
+      "2022": 92,
+      "2023": 95,
+      "2024": 105
+    }
+  },
+  "credential_blocked": [
+    "CAMS European air-quality reanalysis",
+    "MODIS MAIAC MCD19A2.061"
+  ],
+  "deferred": [
+    "NOAA HYSPLIT back trajectories"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "regional_pm25": {
+    "source": "DEFRA AURN",
+    "official_page": "https://uk-air.defra.gov.uk/data/",
+    "access": "public CSV",
+    "timing": "same-day nowcast and explicit lag-1 alternative",
+    "status": "implemented_and_evaluated"
+  },
+  "atmospheric_pm25": {
+    "source": "CAMS European air-quality reanalysis",
+    "official_page": "https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses?tab=overview",
+    "access": "free ADS account and API key required",
+    "timing": "same-day reanalysis",
+    "status": "blocked_on_credentials"
+  },
+  "aerosol_optical_depth": {
+    "source": "MODIS MAIAC MCD19A2.061",
+    "official_page": "https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD19A2_GRANULES",
+    "access": "Earth Engine project or NASA Earthdata login required",
+    "timing": "same-day satellite retrieval with cloud/missingness mask",
+    "status": "blocked_on_credentials"
+  },
+  "air_mass_trajectory": {
+    "source": "NOAA HYSPLIT with GDAS1 meteorology",
+    "official_page": "https://www.ready.noaa.gov/HYSPLIT.php",
+    "access": "public, but requires trajectory-engine and meteorology archive setup",
+    "timing": "back trajectories ending on each study day",
+    "status": "deferred_until_cams_and_maiac"
+  },
+  "traffic": {
+    "source": "DfT London raw traffic counts",
+    "official_page": "https://roadtraffic.dft.gov.uk/downloads",
+    "access": "public CSV",
+    "timing": "manual survey dates only",
+    "status": "rejected_as_daily_feature_after_coverage_audit"
+  }
+}
