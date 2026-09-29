@@ -32,6 +32,8 @@ Thumbs.db
 /paper/*.zip
 /paper/evidence/validation.json
 /paper/MIGRATION.json
+/research_paper/main.pdf
+/research_paper/*.zip
 /docs/organisation-check.json
 /docs/history/
 /presentations/slide_inventory.json

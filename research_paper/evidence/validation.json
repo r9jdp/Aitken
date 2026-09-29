@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "revision_date": "2026-09-29",
+  "pages": 16,
+  "references": 18,
+  "compiler": "Tectonic 0.17.0 (XeTeX and BibTeX)",
+  "compilation_succeeded": true,
+  "undefined_references": false,
+  "overfull_or_underfull_boxes": false,
+  "bibtex_warnings": false,
+  "pdf_link_annotations": 66,
+  "visual_review": "All pages inspected after rendering with Poppler; final appendix pagination inspected after font-size adjustment. Tables, equations, figures and references are readable without clipping.",
+  "original_metrics": "Independently recomputed from saved predictions; agreement with recorded metrics below 1e-6.",
+  "temporal_metrics": "Verified aggregate transcription against versioned CSV, audit and report. Temporal prediction arrays and checkpoints unavailable locally; no fresh prediction-level verification claimed.",
+  "latest_best_values_present_in_pdf": true,
+  "recent_unsuccessful_peak_sensitivity_experiment_in_manuscript": false,
+  "training_rerun": false,
+  "bootstrap_rerun": false,
+  "official_model_or_dashboard_changed": false,
+  "pdf_sha256": "82a41c808b811c20282bad4bb78b381523950b2210e3d5061a5d38ba53647c86",
+  "notes": "Compiler emitted a non-fatal Fontconfig configuration message. Missing bundled fonts were downloaded with permission and the final compilation log has no undefined-reference or box warnings."
+}

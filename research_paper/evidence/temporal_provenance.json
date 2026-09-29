@@ -1,0 +1,21 @@
+{
+  "source_commit": "ce40d22",
+  "sources": {
+    "results\\temporal_model_20260912\\metrics.csv": "c9ff4d8e8a0c54d90159e3004120a4a770cf9a7486045991ceed9c5808c72b0e",
+    "results\\temporal_model_20260912\\audit.json": "f3f05d067d6a4c415adb629f9411a05d44faf65369a5b528536eb38f83ecf6f4",
+    "results\\temporal_model_20260912\\REPORT.md": "280bd2aea4c5124a8f8f740bd3e9b299f4e2afeaa5de6975fab37ef2f20c3f89"
+  },
+  "station_days": 9619,
+  "labelled_dates": 349,
+  "temporal_minus_control_rmse": -0.013591000000000353,
+  "relative_rmse_reduction_percent": 0.3594083077768583,
+  "saved_seven_day_block_rmse_interval": [
+    -0.0203,
+    -0.0075
+  ],
+  "verification": "Aggregate transcription checked against the saved CSV/audit/report; prior audit metadata checked. Temporal predictions and checkpoints unavailable locally: no new row-level or checkpoint verification claimed.",
+  "temporal_metrics_recomputed_from_predictions_this_revision": false,
+  "bootstrap_rerun": false,
+  "models_retrained": false,
+  "model_status": "Experimental; missed 2023 normal-range bias guard. Original official model unchanged."
+}

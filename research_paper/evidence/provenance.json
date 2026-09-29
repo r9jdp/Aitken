@@ -1,0 +1,14 @@
+{
+  "prediction_file": "artifacts\\london_standalone_unet_20260906\\test_2024_laqn_all_models.csv.gz",
+  "prediction_sha256": "bd245cf9187bdf20de7e720f65229994589321f092dfa12f7ca66951e8853637",
+  "bootstrap_file": "artifacts\\london_3year_final_comparison_20260905_145050\\metrics.json",
+  "bootstrap_sha256": "1bed01a00f48ae6aeea694bebf3518c4764ef194464045fec1f880cb398be008",
+  "station_days": 9619,
+  "unique_days": 349,
+  "date_min": "2024-01-01",
+  "date_max": "2024-12-14",
+  "high_event_rows": 216,
+  "metrics_recomputed": true,
+  "models_retrained": false,
+  "checks": "Unique station-day keys, finite observations/predictions, metric agreement < 1e-6; bootstrap intervals transcribed from saved audit, not rerun."
+}

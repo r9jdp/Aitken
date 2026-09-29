@@ -9,8 +9,9 @@ trees, an ANN, a hybrid HGB + residual U-Net and a standalone U-Net.
 
 **Status:** research documentation and an executable dashboard. The reported
 experiments are complete; the dashboard explores saved outputs without retraining.
-Training code, data-access tooling and the manuscript are planned for later
-releases. Generalisation to other cities and operational forecasting have not
+Selected experiment training code and the [maintained LaTeX manuscript](research_paper/README.md)
+are included; the full original data-access pipeline remains local. Generalisation
+to other cities and operational forecasting have not
 yet been demonstrated.
 
 [Data sources](docs/DATA_SOURCES.md) · [Research protocol](docs/RESEARCH_PROTOCOL.md) ·
