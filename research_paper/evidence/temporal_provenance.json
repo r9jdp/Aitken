@@ -13,8 +13,9 @@
     -0.0203,
     -0.0075
   ],
-  "verification": "Aggregate transcription checked against the saved CSV/audit/report; prior audit metadata checked. Temporal predictions and checkpoints unavailable locally: no new row-level or checkpoint verification claimed.",
-  "temporal_metrics_recomputed_from_predictions_this_revision": false,
+  "verification": "Matched-pair aggregates and prior audit metadata checked. Supplied temporal-arm predictions additionally checked when present; matched non-temporal predictions/checkpoints remain unavailable. No new old-pair bootstrap or neural retraining.",
+  "temporal_metrics_recomputed_from_predictions_this_revision": true,
+  "supplied_temporal_predictions_sha256": "adeb406b666a58c9c3fb4bb7fd09a7d77022c4f7ecc8403c11a8c1d219715ee5",
   "bootstrap_rerun": false,
   "models_retrained": false,
   "model_status": "Experimental; missed 2023 normal-range bias guard. Original official model unchanged."

@@ -1,0 +1,16 @@
+{
+  "source": "code/pm25_london_bundle/presentation.pptx (relative to LY_project)",
+  "source_sha256": "d31677707145e03d9c5d51e79ce6a0c0f8ab683bb89f6c173f3305a90faddc44",
+  "slide": 2,
+  "authors": [
+    {"name": "Rajdeep Pandey", "roll_number": "16014223064"},
+    {"name": "Sagar Jadhav", "roll_number": "16014223070"},
+    {"name": "Sohom Mallick", "roll_number": "16014223083"},
+    {"name": "Vruddhi Mule", "roll_number": "16014223099"}
+  ],
+  "branch": "Artificial Intelligence & Data Science",
+  "group_id": "38",
+  "guide": "Dr. Suchitra Patil",
+  "institution_from_slide_1": "KJ Somaiya School of Engineering",
+  "presentation_modified": false
+}

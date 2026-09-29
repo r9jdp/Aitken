@@ -1,0 +1,34 @@
+{
+  "verification": "Local AURN correction reproduced from supplied temporal predictions; upstream neural outputs not regenerated.",
+  "sources": {
+    "artifacts\\aurn_reproduction_20260930\\aurn_same_day_2024_predictions.csv.gz": "47b9a936a34e812a262224c482b51b195575863db6c8021250f311a653f90502",
+    "artifacts\\aurn_reproduction_20260930\\summary.json": "08caedc8bc91fb931efeb5835955314394655fec6936ba44f2c20eaead2f2b34",
+    "comparison\\aurn_import_20260930\\reproduction_audit.json": "b47a98c817ed2aea75a2a4dd1169a67a43b0ecfae1c9d91e5b6055028e12ef76"
+  },
+  "metrics": {
+    "control": {
+      "n": 9619,
+      "mae": 2.336122987980068,
+      "rmse": 3.7679020337357625,
+      "r2": 0.5200588274209321,
+      "bias": -0.7684912169553344
+    },
+    "corrected": {
+      "n": 9619,
+      "mae": 2.1343338626497244,
+      "rmse": 3.2308853247349125,
+      "r2": 0.64711606259963,
+      "bias": -0.4832064946616276
+    }
+  },
+  "station_days": 9619,
+  "labelled_dates": 349,
+  "paired_seven_day_interval": [
+    -0.8293926889771052,
+    -0.2373114107978045
+  ],
+  "bootstrap_recomputed_in_reproduction": true,
+  "neural_models_retrained": false,
+  "wind_scaling_issue_fixed": false,
+  "official_model_promoted": false
+}

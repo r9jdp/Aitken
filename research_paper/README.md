@@ -1,27 +1,46 @@
 # Greater London PM2.5 manuscript
 
-This is the maintained LaTeX paper inside Aitken, updated on **29 September
+This is the maintained LaTeX paper inside Aitken, updated on **30 September
 2026** from the original `LY_project/research_paper` draft. The original paper
-and London bundle were not edited. Author and supervisor attribution are
-preserved: Rajdeep Pandey, KJ Somaiya College of Engineering; guidance from
-Dr. Suchitra Patil.
+and London bundle were not edited. Author names and roll numbers are copied
+from slide 2 of `../code/pm25_london_bundle/presentation.pptx` (relative to
+the Aitken root):
+
+| Group member | Roll number |
+|---|---|
+| Rajdeep Pandey | 16014223064 |
+| Sagar Jadhav | 16014223070 |
+| Sohom Mallick | 16014223083 |
+| Vruddhi Mule | 16014223099 |
+
+The presentation identifies Group 38, Artificial Intelligence & Data Science,
+KJ Somaiya School of Engineering, with guidance from Dr. Suchitra Patil.
 
 ## What changed
 
-- Abstract, method, comparison table, RMSE figure and conclusion now include
-  the temporal hybrid: MAE **2.3361**, RMSE **3.7679**, R2 **0.5201**.
+- Abstract, data, methods, evaluation, comparison tables, RMSE figure and
+  conclusion now include the reproduced **temporal hybrid + same-day AURN
+  correction**: MAE **2.1343**, RMSE **3.2309**, R2 **0.6471**.
+- A new daily-mean plot shows both the full labelled period and the March
+  episode, including remaining large peak errors. All plotted values come
+  from real observations and saved/reproduced predictions.
+- The new result is separate from the temporal hybrid (**3.7679** RMSE) and
+  does not change the standalone U-Net score or imply architecture superiority.
 - The fresh matched control (RMSE **3.7815**) is shown separately from the
   original official hybrid (RMSE **3.7765**).
-- The five past-only features, 72-input composition, small 0.36% matched RMSE
-  gain, saved seven-day-block interval, and validation qualification are explicit.
+- Both the five past-only features and four external AURN correction inputs
+  are defined. Same-day information, wind-scaling defect, local reproduction
+  boundary and previously inspected 2024 evaluation remain explicit.
 - Existing baseline/standalone results and scientific limitations remain.
 - The recent unsuccessful peak-sensitivity test is not described in the paper.
 - This is a manuscript update, not model promotion or retraining. The official
   dashboard, performance table and presentation are unchanged.
 
-The temporal model is the best recorded numerical configuration but remains
-experimental: it missed the 2023 normal-range positive-bias guard. 2024 is a
-previously examined **retrospective benchmark**, not an untouched test set.
+The AURN-assisted configuration has the best reproduced numerical score but
+remains experimental. The upstream temporal model missed its 2023 positive-bias
+guard, and the regional wind feature needs a separately evaluated correction.
+2024 is a previously examined **retrospective benchmark**, not an untouched
+test set. Extra same-day station information does not establish next-day skill.
 
 ## Build / Overleaf
 
@@ -49,25 +68,35 @@ py -3.10 research_paper/build_assets.py --temporal-only
 py -3.10 research_paper/build_assets.py --bundle ../code/pm25_london_bundle
 ```
 
-The first command only reads the small versioned temporal result files. The
-second additionally requires the existing original prediction/metadata
-artifacts, NumPy, pandas and Matplotlib. Source inputs are read-only; all
+The first command refreshes the temporal tables and provenance from versioned
+results and verifies supplied temporal predictions when available. The second
+additionally requires the original prediction/metadata artifacts and local
+AURN reproduction outputs, NumPy, pandas and Matplotlib. Source inputs are read-only; all
 generated outputs remain in this manuscript directory. No models are trained.
 
 Original scores are recomputed from saved station predictions and checked
 against saved metrics to within 1e-6. Temporal scores are checked against
 `../results/temporal_model_20260912/metrics.csv`, `audit.json` and `REPORT.md`.
-The prior audit reports identical evaluation rows and six checkpoint hashes,
-but the temporal prediction arrays/checkpoints are unavailable locally for
-this update. No fresh prediction-level temporal audit is claimed. Both
-bootstrap analyses are transcribed from saved evidence, not newly rerun.
+The prior temporal audit reports identical evaluation rows and six checkpoint
+hashes. The supplied supplement now contains the temporal arm's 2023/2024
+station predictions. The AURN audit verifies these against the original rows,
+repeats correction selection/fitting, and independently recomputes the new
+seven-day interval. The upstream neural predictions are not regenerated; the
+old non-temporal matched predictions and neural checkpoints are still absent.
+The older original/temporal comparison intervals remain transcribed evidence.
+
+Reproduction code and audit: `scripts/reproduce_aurn_supplement.py` and
+`comparison/aurn_import_20260930/`, relative to Aitken. Manuscript tables and
+figures use the separate local rerun under `artifacts/aurn_reproduction_20260930/`.
+The full asset build requires those locally installed artifacts. Neither the
+manuscript nor this asset build changes any model or original input data.
 
 ## Contents
 
-- `main.tex`, `references.bib`: paper and 18 references, including an explicitly
-  labelled project-evidence citation, not an additional peer-reviewed baseline.
+- `main.tex`, `references.bib`: paper and 20 references, including two explicitly
+  labelled project-evidence citations, not additional peer-reviewed baselines.
 - `tables/`, `figures/`: included small assets for independent LaTeX compilation.
-- `evidence/`: original recomputed metrics and both provenance manifests.
+- `evidence/`: original recomputed metrics, temporal/AURN provenance and author source.
 - `REVIEW_AND_CLAIMS.md`: outline, claim-evidence mapping and editorial review.
 - `build_assets.py`: asset regeneration from existing artifacts.
 

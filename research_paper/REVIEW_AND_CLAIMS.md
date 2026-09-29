@@ -1,6 +1,61 @@
 # Editorial review and claim-evidence map
 
-## September 29 revision plan and evidence boundary
+## September 30 AURN and authorship revision (current)
+
+This section supersedes the historical September 29 descriptions of the best
+score and unavailable temporal-arm predictions. Original and old matched-pair
+results remain in the manuscript. The recent unsuccessful peak-sensitivity
+experiment remains excluded, as requested; the AURN selection outcome and
+material implementation limitations are not hidden.
+
+Mini-outline:
+
+1. Data: distinguish added regional AURN inputs from unchanged London labels.
+2. Methods: define the four-feature, gated daily Ridge adjustment after decoding.
+3. Protocol: describe 2023 leave-one-month-out selection, freeze, and 2024 reuse.
+4. Evidence: add locally reproduced metrics, band errors, bootstrap and episode plot.
+5. Interpretation: state stronger same-day information, unresolved peaks, wind defect
+   and the boundary between correction reproduction and neural retraining.
+6. Authorship: copy four names, roll numbers and group details from the presentation.
+
+Paragraph roles and reverse outline: regional information gap (motivation) ->
+source/QC and separate feature contract (definition) -> Ridge, gate and clipping
+(design) -> selection/reproduction boundaries (protocol) -> overall improvement
+and remaining episode failure (evidence) -> retrospective and spatial limits
+(interpretation). Abstract and conclusion follow that same claim sequence.
+
+| Current claim | Evidence | Status |
+|---|---|---|
+| AURN correction MAE 2.1343, RMSE 3.2309, R2 0.6471 | `../comparison/aurn_import_20260930/reproduction_audit.json`; local rerun predictions | Reproduced from supplied temporal predictions, not regenerated upstream neural outputs. |
+| RMSE improves 14.25%; high-band MAE improves 27.24% | Same paired rows, same audit and feature array | Supported; not a same-input U-Net architecture comparison. |
+| Seven-day interval [-0.8294,-0.2373] | Independent 5,000-resample moving-block computation in reproduction script | Recomputed; retrospective descriptive interval, not untouched confirmation. |
+| 213/216 high readings remain underpredicted; March 11 mean 11.17 -> 15.83 versus 34.76 observed | Reproduced station-level predictions and episode audit | Supported; no claim of resolved peak errors. |
+| 15 usable sites, 16,413 regional station-days, all study dates covered | `../comparison/aurn_import_20260930/audit.json`; raw-file reaggregation | Supported; original 444,202 London station-days remain unchanged. |
+| Regional stage fits daily mean residuals with Ridge and adds one scalar/day | `../experiments/external_features/run_aurn_correction.py` | Supported; cannot claim finer within-day hotspot ordering except clipping effects. |
+| Direction-weighted feature misuses standardized wind components | Import audit plus original feature scalers and source code | Material defect disclosed; no corrected-wind score invented. |
+| Four authors and roll numbers | Original `presentation.pptx`, slide 2; source hash in author evidence | Exact transcription; no invented coauthors, roles or emails. |
+
+Five-dimension review:
+
+- Contribution: a reproducible data-integration result, not a new architecture
+  or claim of beating external published models on a common benchmark. **Pass.**
+- Clarity: distinguish original hybrid, temporal hybrid and temporal + AURN;
+  define which inputs/loss space change. **Pass.**
+- Experimental strength: appreciably lower paired RMSE and peak MAE, with
+  same-day-information advantage, still-large episode errors and prior benchmark
+  inspection. **Bounded claim supported; new prospective evidence needed.**
+- Evaluation completeness: unchanged station membership, exact float32 targets,
+  all selection decisions and numerical tolerance checked. No independent neural
+  regeneration or full-grid truth claimed. **Pass within stated boundary.**
+- Method soundness: leave-one-month-out is not rolling-origin; ratified daily
+  readings are retrospective; wind defect and upstream bias guard remain.
+  **Disclosed; physical-wind/issue-time/spatial evaluation still needed.**
+
+The author block and latest numerical statements must be verified in the
+compiled PDF. The paper's maintained source, bibliography, evidence assets,
+and reviewer companion stay in Aitken; presentation/model/dashboard unchanged.
+
+## September 29 revision plan and evidence boundary (historical)
 
 The maintained manuscript is now `Aitken/research_paper/main.tex`. Its starting
 point was the September 7 manuscript in `LY_project/research_paper`; that source

@@ -25,10 +25,16 @@
 \newcommand{\tableinput}[1]{\@@input #1 }
 \makeatother
 \title{Daily PM\textsubscript{2.5} Estimation over Greater London:\\
-A Retrospective Comparison of Gradient Boosting,\\
-Standalone U-Net, and Hybrid Residual Learning}
-\author{Rajdeep Pandey\\
-KJ Somaiya College of Engineering\\[3pt]
+A Retrospective Study of Boosting, U-Net\\
+and Regional Pollution Correction}
+\author{\normalsize\begin{tabular}{@{}ll@{}}
+Rajdeep Pandey & 16014223064\\
+Sagar Jadhav & 16014223070\\
+Sohom Mallick & 16014223083\\
+Vruddhi Mule & 16014223099
+\end{tabular}\\[6pt]
+\normalsize Artificial Intelligence \& Data Science, Group 38\\
+\normalsize KJ Somaiya School of Engineering\\[3pt]
 \small Under the guidance of Dr. Suchitra Patil}
 \date{}
 
@@ -46,25 +52,25 @@ pollution predictors on a 1~km grid. The prepared 2021--2024 package contains
 from 2021--2023. Histogram gradient boosting (HGB), constrained HGB, XGBoost, a
 multilayer perceptron, a standalone U-Net and an HGB--residual-U-Net hybrid are
 evaluated on a common benchmark of 9,619 London Air Quality Network station-days
-from 1 January to 14 December 2024. A subsequent temporal hybrid adds five
-past-only pollution-history summaries and achieves the lowest recorded errors:
-MAE 2.3361~\ug, RMSE 3.7679~\ug\ and $R^2=0.5201$. Its RMSE improvement
-over a freshly fitted matched hybrid is 0.0136~\ug\ (0.36\%); a descriptive
-seven-day-block interval for temporal-minus-control RMSE is
-[$-0.0203$, $-0.0075$]~\ug. It remains experimental because it missed a
-pre-specified 2023 validation bias guard. The retained original hybrid obtains
-RMSE 3.7765~\ug, compared with HGB's 3.7920~\ug\ and the standalone
-U-Net ensemble's 4.1227~\ug. High-concentration underprediction persists:
-the temporal model's MAE on observations at least 25~\ug\ is 14.0490~\ug.
-The evidence therefore supports a small retrospective temporal-feature gain,
-not general U-Net superiority or resolution of pollution-episode errors.
-Previously inspected evaluation data,
-retrospective covariates, sparse spatial supervision and in-sample baseline
-maps during residual training limit prospective and spatial-generalisation claims.
+from 1 January to 14 December 2024. The original hybrid obtains RMSE
+3.7765~\ug, compared with HGB's 3.7920~\ug\ and the standalone U-Net
+ensemble's 4.1227~\ug. In a separate matched refit, five past-only history
+summaries reduce RMSE from 3.7815 to 3.7679~\ug. A subsequent day-level Ridge correction
+uses same-day regional observations from the Automatic Urban and Rural
+Network (AURN), without retraining the neural models. Local reproduction from
+saved temporal predictions gives MAE 2.1343~\ug, RMSE 3.2309~\ug\ and
+$R^2=0.6471$: a 14.25\% RMSE reduction relative to the temporal hybrid.
+A descriptive seven-day-block interval for corrected-minus-control RMSE is
+[$-0.8294$, $-0.2373$]~\ug. MAE on observations at least 25~\ug\ falls
+from 14.0490 to 10.2219~\ug, although 213 of 216 such readings remain
+underpredicted. The improvement reflects additional same-day regional
+information, not demonstrated architectural superiority or next-day forecast
+skill. Previously examined benchmark data, sparse spatial supervision and a
+documented wind-scaling defect constrain interpretation and model promotion.
 \end{abstract}
 
 \noindent\textbf{Keywords:} \pmfine; Greater London; retrospective estimation;
-histogram gradient boosting; U-Net; residual learning; environmental data integration.
+histogram gradient boosting; U-Net; residual learning; regional monitoring.
 
 \section{Introduction}
 % Paragraph role: opening and problem.
@@ -91,17 +97,20 @@ This paper documents a Greater London pipeline and compares its completed
 model configurations under a common observation-level evaluation. Its
 contribution is an implementation-grounded case study of tabular, direct neural
 and hybrid residual estimation; no new model family or priority claim is made.
-The analysis addresses three questions: (i) how do these configurations compare
+The analysis addresses four questions: (i) how do these configurations compare
 on common regulatory observations; (ii) how large are the gains from a spatial
-correction and additional past-only temporal features; and (iii) what errors
-remain in spatial variation and high concentrations?
+correction and additional past-only temporal features; (iii) does additional
+same-day regional pollution information reduce episode errors; and (iv) what
+errors remain in spatial variation and high concentrations?
 Methods, source transformations and evaluation history are reported alongside
 the favourable and unfavourable results.
 
 % Paragraph role: interpretation boundary.
 The task is retrospective daily estimation with rolling access to earlier
 pollution measurements. Models may use environmental covariates associated
-with target day $t$ and measured \pmfine\ from dates before $t$. Quarterly
+with target day $t$ and measured London \pmfine\ from dates before $t$. The
+AURN-assisted extension additionally uses regional measurements on day $t$.
+Quarterly
 satellite composites can include imagery acquired later within the same
 quarter, and weather inputs are reanalysis products. Consequently, this study
 does not demonstrate a strict next-day operational forecast. Moreover, 2024
@@ -206,6 +215,9 @@ LAEI 2022 & Spatial emissions-inventory predictors retained as static
 inputs \citep{laei2022}. \\
 Grid and calendar & Domain masks, coordinates, day-of-year/day-of-week
 encodings and a time trend. \\
+AURN (extension only) & Same-day regional measurements for a separate
+day-level correction; not new London training targets or U-Net channels
+\citep{aurn}. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -252,13 +264,41 @@ However, later 2024 estimates can depend on earlier 2024 observations. The word
 imply causal inference, removal of station-history effects, or independence
 between all train and evaluation locations.
 
+\subsection{Additional regional AURN observations}
+The regional extension uses DEFRA's Automatic Urban and Rural Network,
+which provides hourly \pmfine\ measurements \citep{aurn}. The implemented
+selection retains background or rural sites 30--110~km from central London.
+Of 18 selected sites, 15 supply usable observations in 2021--2024, yielding
+16,413 valid station-days. Every one of the 1,461 dates has 6--15 reporting
+sites. The preparation retains ratified hourly values in 0--500~\ug\ and
+requires at least 18 valid hours per station-day. Reaggregating the shared
+hourly files reproduces the supplied daily values \citep{aitkenaurn2026}.
+
+Daily regional features comprise an inverse-distance-weighted mean, maximum,
+a direction-weighted mean and $\log(1+n_t)$ for reporting-site count $n_t$.
+The base station weight is $1/\max(d,25)$ for distance $d$ in kilometres.
+An availability field and three lag-one fields are also stored, but the
+selected same-day correction uses only the four features above. These inputs
+remain separate from the original London targets and 72-channel temporal
+U-Net input. The closest selected AURN station is 9.30~km from the 38
+evaluated LAQN sites. This excludes obvious co-location in the selected set,
+without proving independence of every upstream measurement process.
+
+The supplied direction-weighted feature has a known implementation defect:
+it computes the angle from standardised ERA5 wind channels without first
+restoring physical units. We preserve those features to reproduce the recorded
+experiment, rather than silently changing its inputs. Its physical
+interpretation and the resulting model-status limitation are discussed in
+Section~\ref{sec:aurn-limits}.
+
 \section{Methods}
 \subsection{Model inputs and supervision}
 Let $X_t\in\mathbb{R}^{66\times48\times64}$ denote the retained predictor maps,
 $m_{tg}$ indicate a labelled cell, and $y_{tg}$ be its target. All
 original configurations use this retained feature contract. The temporal
-extension adds five history summaries to the U-Net only. All reported 2024
-configurations fit on 2021--2023. Tree and ANN models receive cell feature
+extension adds five history summaries to the U-Net only. The underlying models
+used for reported 2024 predictions fit on 2021--2023; the subsequent AURN
+correction fits separate 2023 out-of-year residuals. Tree and ANN models receive cell feature
 vectors; the U-Nets process
 daily grids. Final source weights are $s_{tg}=1$ for LAQN-containing cells and
 $s_{tg}=0.15$ for Breathe-only cells. This overrides the prepared Breathe-only
@@ -272,7 +312,10 @@ Equation~\ref{eq:target} is separate from this sample weighting.
 operations; it is not an experimental result. Unobserved cells do not acquire
 fabricated training labels. The hybrid additionally receives the HGB baseline
 map as its 67th input channel in the original configuration. The temporal
-extension inserts five history channels before the HGB map, giving 72 inputs.}
+extension inserts five history channels before the HGB map, giving 72 inputs.
+The AURN correction subsequently adjusts concentration-scale temporal outputs
+without changing these neural inputs. Its numerical audit uses station rows,
+not newly generated full-grid AURN maps.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -421,6 +464,40 @@ fresh matched control, not treated as a one-factor modification of the
 earlier published hybrid. Both final arms use seeds 42, 11 and 22 and the
 same 2021--2023 fitting window.
 
+\subsection{Regional correction of temporal-hybrid predictions}
+\label{sec:aurn-method}
+Regional observations can supply information about pollution episodes that
+earlier London measurements alone may not capture. The extension therefore
+adds a small day-level correction to saved temporal-hybrid predictions; no HGB
+or U-Net weights are retrained in this experiment \citep{aitkenaurn2026}.
+For each 2023 date, the training response is the mean observed-minus-predicted
+LAQN residual across available stations. A standardised four-feature Ridge
+regression estimates this daily residual, giving equal weight to each day.
+Feature scaling is fitted within each training fold, then on all 2023 dates
+for the frozen final correction.
+
+Let $a_t$ contain the four AURN features, $q_t$ be the maximum of its first
+three concentration-valued entries, and $f(a_t)$ be the fitted Ridge output
+in \ug. The selected correction is
+\begin{align}
+ g(q_t)&=\operatorname{clip}\!\left(\frac{q_t-8}{15-8},0,1\right),\\
+ \widehat y^{\mathrm{AURN}}_{tg}
+ &=\operatorname{clip}\!\left[\widehat y^{\mathrm{temporal}}_{tg}
+ +0.75\,g(q_t)\operatorname{clip}\!\left(f(a_t),-5,15\right),0,500\right].
+ \label{eq:aurn}
+\end{align}
+The Ridge regularisation parameter is 1. The concentration-dependent gate
+reduces changes on low-regional-pollution days, and shrinkage limits the
+adjustment. Unlike the U-Net residual in Equation~\ref{eq:hybrid}, this
+correction is added after decoding, directly in concentration units.
+
+Every location receives the same adjustment on a given date. Apart from final
+clipping, this preserves within-day spatial differences and hotspot ordering.
+Thus this experiment tests adjustment of the regional pollution level, not
+new spatial detail learned by U-Net. Four features are sufficient for the
+selected correction; neither the eight-field preparation archive nor its
+availability flag is appended wholesale to the neural network.
+
 \section{Experimental protocol}
 \subsection{Chronology and common evaluation rows}
 The original development protocol uses 2021--2022 for fitting and 2023 for
@@ -453,6 +530,25 @@ three-seed final fits on 2024. That comparison is an exploratory retrospective
 result, not a validation-approved promotion or an untouched confirmation.
 The original hybrid remains the official model.
 
+\subsection{AURN selection and verification protocol}
+The correction uses 11,102 saved 2023 LAQN station predictions from a temporal
+model fitted on 2021--2022. Twelve folds hold out one calendar month at a time.
+They are leave-one-month-out folds, not forward-only rolling-origin folds:
+later months can train a fold evaluated on an earlier month. Four Ridge
+penalties $(0.1,1,10,100)$, three lower gates $(8,10,12)$, three upper gates
+$(15,20,25)$ and four shrinkage factors $(0.25,0.5,0.75,1)$ yield 144 recipes
+per information source. Eligible recipes improve RMSE, $R^2$ and high-band
+MAE without worsening MAE below 15~\ug; the lowest-RMSE eligible recipe is
+selected. This rule does not contain the temporal model's signed-bias guard.
+
+The same-day source passes this rule; the lag-one alternative has no eligible
+recipe and is not advanced as an improved model. The implementation saves its
+selection before reading 2024 labels, refits the chosen correction on all
+2023 daily residuals and applies it to the unchanged 2024 temporal predictions.
+This reuses a previously examined retrospective benchmark. It is neither an
+untouched confirmation nor a prospective availability test for ratified daily
+AURN data, and the selected cross-validation score is not an unbiased test score.
+
 \subsection{Metrics and descriptive uncertainty}
 For station observations $y_i$, predictions $p_i$ and errors $e_i=p_i-y_i$,
 the primary metrics are
@@ -480,7 +576,11 @@ model serial dependence across successive dates. Separately, the temporal
 report provides a paired seven-calendar-day block-bootstrap RMSE-difference
 interval, retaining short-range temporal grouping as well as paired rows.
 That interval and the original single-day intervals are distinct analyses and
-are labelled separately. Neither accounts for prior benchmark inspection or
+are labelled separately. The AURN comparison additionally recomputes a paired
+moving seven-calendar-day block interval using 5,000 resamples, keeping all
+station rows for each sampled day and seed 20260930. Negative
+corrected-minus-temporal RMSE differences favour the correction. None of these
+intervals accounts for prior benchmark inspection or
 establishes uncertainty in predictions at unmonitored cells.
 
 \subsection{Artifact verification}
@@ -495,20 +595,33 @@ preparation. These checks establish consistency of saved artifacts and
 arithmetic; they are not a new end-to-end retraining or independent validation
 of every provider measurement.
 
-Temporal results are transcribed from the versioned metrics CSV, report and
+The earlier matched temporal comparison is sourced from its metrics CSV, report and
 audit \citep{aitkentemporal2026}. The prior audit records recalculated metrics,
 identical evaluation rows, unchanged source inputs and hashes of all six final
-checkpoints. Those temporal prediction arrays and checkpoints are not available
-locally for this manuscript update. We therefore verify the aggregate values,
-differences and source-file hashes, but do not claim to rerun the temporal
-audit or its bootstrap. Temporal station-level plots and spatial correlations
-are not inferred from aggregate scores.
+checkpoints. The supplied supplement now provides the temporal arm's 2023
+and 2024 station predictions, but not its neural checkpoints or the matched
+non-temporal control predictions. The old matched-pair interval remains a
+transcription, rather than a newly rerun temporal-versus-control bootstrap.
+
+The AURN reproduction independently verifies all 11,102 selection rows and
+9,619 benchmark rows against the original station archive, including unique
+station/date identities, grid positions and unchanged float32 observations
+\citep{aitkenaurn2026}. It checks the feature and supplement hashes, reruns
+all recipe trials and the final Ridge fit, and independently recomputes the
+metrics and seven-day interval. Selection decisions agree exactly; the largest
+numeric difference across trial records is below $2\times10^{-5}$. Reproduced
+RMSE differs from the shared value by less than $7\times10^{-7}$~\ug,
+consistent with minor floating-point variation. This verifies the correction
+from supplied neural predictions, not independent regeneration of those
+predictions or a full end-to-end training audit.
 
 \section{Results}
 \subsection{Common-benchmark performance}
-The temporal hybrid has the lowest recorded MAE and RMSE in
-Table~\ref{tab:main}; the matched comparison is detailed in
-Section~\ref{sec:temporal-results}. Within the original configurations,
+The AURN-assisted temporal hybrid has the lowest MAE and RMSE in
+Table~\ref{tab:main}, but receives additional same-day regional measurements.
+Its paired comparison is detailed in Section~\ref{sec:aurn-results}; the
+earlier temporal comparison appears in Section~\ref{sec:temporal-results}.
+Within the original configurations,
 the hybrid's RMSE is 3.7765~\ug, compared with
 3.7920~\ug\ for unconstrained HGB, a relative reduction of approximately
 0.41\%. The small difference is visible against the broader configuration
@@ -519,7 +632,8 @@ matters.
 \begin{table}[tb]
 \caption{Common LAQN benchmark: 9,619 station-days, 1 January--14 December 2024;
 final fitting on 2021--2023. MAE and RMSE are in \ug. The later temporal
-comparison uses its own matched HGB refit. Bold identifies the best scores
+comparison uses its own matched HGB refit. AURN adds same-day information and
+is separated from the unchanged-input comparisons. Bold identifies the best scores
 within each group, not statistical significance or model promotion.}
 \label{tab:main}
 \centering\small
@@ -532,6 +646,9 @@ Configuration & MAE $\downarrow$ & RMSE $\downarrow$ & $R^2$ $\uparrow$ \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Later matched temporal comparison (experimental)}}\\
 \tableinput{tables/temporal_results.tex}
+\midrule
+\multicolumn{4}{@{}l}{\textit{Additional same-day regional information (experimental)}}\\
+\tableinput{tables/aurn_results.tex}
 \bottomrule
 \end{tabular}
 \end{table}
@@ -540,8 +657,9 @@ Configuration & MAE $\downarrow$ & RMSE $\downarrow$ & $R^2$ $\uparrow$ \\
 \centering
 \includegraphics[width=.94\linewidth]{figures/rmse_comparison.pdf}
 \caption{Original RMSE values recomputed from saved predictions, with the
-two later temporal-comparison values transcribed from the saved audit.
-All score 9,619 LAQN rows. The horizontal axis starts at zero. Bars show point
+two later temporal-comparison values and the locally reproduced AURN result.
+All score 9,619 LAQN rows; the last row uses additional same-day measurements
+and is not a same-input architecture comparison. The horizontal axis starts at zero. Bars show point
 estimates, not uncertainty, computational cost or deployment status.}
 \label{fig:ranking}
 \end{figure}
@@ -560,7 +678,7 @@ the tree configurations, while its RMSE is slightly below the standalone
 U-Net ensemble. Thus, a single statement that all neural models outperform
 all tree models would contradict the observed results.
 
-\subsection{Latest temporal result and its matched comparison}
+\subsection{Temporal result and its matched comparison}
 \label{sec:temporal-results}
 The temporal hybrid obtains MAE 2.3361~\ug, RMSE 3.7679~\ug\ and
 $R^2=0.5201$. Its freshly fitted non-temporal control obtains 2.3443~\ug,
@@ -590,9 +708,54 @@ Diagnostic & Matched control & Temporal hybrid \\
 The high-concentration MAE falls only from 14.1090 to 14.0490~\ug
 (Table~\ref{tab:temporal-diagnostics}). Thus the lower overall RMSE does not
 resolve the dominant episode-error problem. The temporal configuration is
-the best recorded numerical result, but is retained as experimental because
+the stronger of that experiment's two configurations, but remains experimental because
 it did not pass the earlier 2023 promotion guard. This qualification is part
 of interpreting its favourable 2024 scores, not a reason to discard those scores.
+
+\subsection{Reproduced AURN-assisted result}
+\label{sec:aurn-results}
+The same-day regional correction reduces temporal-hybrid RMSE from 3.7679 to
+3.2309~\ug\ (14.25\%) and MAE from 2.3361 to 2.1343~\ug\ (8.64\%).
+$R^2$ increases from 0.5201 to 0.6471. The reproduced seven-day-block interval
+for corrected-minus-temporal RMSE is [$-0.8294$, $-0.2373$]~\ug.
+This is a larger retrospective gain than the temporal-history extension,
+but it also changes the available information. It is not evidence that a
+different U-Net architecture alone improves performance by 14.25\%.
+
+\begin{table}[tb]
+\caption{Locally reproduced regional-correction diagnostics on unchanged 2024
+observations. Errors and bias are in \ug. The bands contain 8,625, 778 and
+216 observations, respectively.}
+\label{tab:aurn-diagnostics}
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Diagnostic & Temporal hybrid & With AURN correction \\
+\midrule
+\tableinput{tables/aurn_diagnostics.tex}
+\bottomrule
+\end{tabular}
+\end{table}
+
+High-concentration MAE falls from 14.0490 to 10.2219~\ug\ (27.24\%), while
+MAE below 15~\ug\ decreases from 1.7174 to 1.6967~\ug. These results show
+that the pooled gain does not come at the expense of increased mean absolute
+error on ordinary observations. However, 213 of 216 high readings remain
+underpredicted. On 11 March 2024, the mean across 33 evaluated stations is
+34.76~\ug; the correction raises the mean prediction from 11.17 to
+15.83~\ug. That day's MAE improves from 23.60 to 18.94~\ug, leaving a
+large unresolved episode error (Figure~\ref{fig:aurn-series}).
+
+\begin{figure}[tb]
+\centering
+\includegraphics[width=\linewidth]{figures/aurn_timeseries.pdf}
+\caption{Daily means over the same available LAQN station rows: observed
+values, temporal predictions and AURN-corrected predictions. Top: the 349
+labelled benchmark dates. Bottom: the March episode. Station availability
+varies by date, so these are monitoring-network means rather than London
+area-weighted means. No labels are invented for the unscored final 17 days.}
+\label{fig:aurn-series}
+\end{figure}
 
 \subsection{Magnitude and uncertainty of the original hybrid improvement}
 Table~\ref{tab:bootstrap} reports the saved paired-day bootstrap comparisons
@@ -683,9 +846,17 @@ additional information after baseline fitting is a plausible explanation for
 the small gain; it is an interpretation, not a demonstrated causal mechanism.
 The additional temporal summaries give a further small matched gain, while
 leaving high-concentration errors largely unresolved. No controlled ablation
-isolates the contribution of every input group,
+isolates the contribution of every original input group,
 architectural block, ensemble size or training-loss choice in the final
 three-year experiment.
+
+The AURN comparison supplies a more substantial improvement by adding regional
+measurements on the target day. With the temporal predictions fixed, the
+paired comparison isolates the effect of the combined regional-feature/Ridge
+correction stage, not the contribution of each regional feature separately.
+Its daily scalar adjustment cannot establish improved within-day hotspot
+ordering. A stronger information set and a different learning architecture
+are distinct explanations and should not be conflated.
 
 The standalone comparison is informative but not a pure one-factor ablation
 of the HGB input. Removing HGB also changes the learning target from a residual
@@ -708,7 +879,10 @@ Operational availability is a second, separate constraint. Same-day ERA5
 reanalysis and same-quarter Sentinel-2 composites are appropriate for
 retrospective reconstruction, but may be unavailable at a real forecast issue
 time. Census and emissions inventories are static reference products rather
-than contemporaneous daily observations. A deployment-oriented evaluation
+than contemporaneous daily observations. The AURN correction also requires
+same-day ratified daily measurements, with at least 18 valid hours. The
+experiment does not show that these inputs are available by a forecast issue
+time. A deployment-oriented evaluation
 would need covariates available by a specified issue time, archived forecast
 weather and explicitly lagged satellite composites. No such evaluation is
 reported here.
@@ -748,24 +922,50 @@ observed, but attribution to log targets, robust loss, density weighting,
 distribution shifts or smooth covariates would require additional controlled
 experiments. These possibilities are hypotheses for follow-up work.
 
+\subsection{Regional-feature implementation and verification limits}
+\label{sec:aurn-limits}
+The wind-direction feature requires correction before a physically interpreted
+deployment. The supplied code applies $\operatorname{atan2}(-u,-v)$ to
+standardised rather than physical ERA5 components. In a diagnostic copy,
+undoing the recorded scales changes inferred direction by a median
+10.52 degrees, with changes above 30 degrees on 202 of 1,461 dates. The
+direction-weighted concentration changes by 0.396~\ug\ on average and
+up to 16.343~\ug. These are feature differences, not measured changes in
+model error. Inverse scaling also cannot undo the cube's clipping and float16
+quantisation. A separately labelled experiment using original physical winds
+is needed; the numerical results here deliberately reproduce the supplied
+features unchanged.
+
+This defect does not show that the observed improvement is spurious: the
+regional mean and maximum remain useful candidate information. It does mean
+that the directional feature cannot be described as physically validated.
+Likewise, reproducing correction arithmetic from shared station predictions
+does not regenerate the upstream temporal U-Net or demonstrate full-grid
+accuracy. These verification limits, the upstream temporal bias-guard failure
+and retrospective information availability preclude automatic promotion of
+the AURN-assisted model to the official dashboard.
+
 \section{Conclusion}
 A completed multi-source Greater London pipeline enables a transparent
 comparison of daily \pmfine\ estimation configurations on a shared regulatory
-benchmark. The best recorded experimental configuration is the temporal
-HGB--residual-U-Net ensemble: MAE 2.3361~\ug, RMSE 3.7679~\ug\ and
-$R^2=0.5201$ on 9,619 station-days. Against its matched non-temporal control,
-the RMSE reduction is 0.0136~\ug\ (0.36\%), with descriptive seven-day-block
-interval [$-0.0203$, $-0.0075$]~\ug\ for temporal minus control. This small
-retrospective improvement does not meet the separate 2023 validation bias
-guard, so the original hybrid remains the official model. Its RMSE is
-3.7765~\ug, compared with HGB's 3.7920~\ug\ and the tested standalone
-U-Net ensemble's 4.1227~\ug. Peak errors remain substantial even for the
-temporal hybrid, with high-concentration MAE 14.0490~\ug.
+benchmark. Among the original models, the hybrid reaches RMSE 3.7765~\ug,
+compared with HGB's 3.7920~\ug\ and the tested standalone U-Net ensemble's
+4.1227~\ug. Past-only temporal summaries provide a small further gain.
+The strongest reproduced numerical result adds a same-day regional AURN
+correction to the temporal hybrid: MAE 2.1343~\ug, RMSE 3.2309~\ug\ and
+$R^2=0.6471$ on 9,619 unchanged station-days. Relative to the temporal hybrid,
+RMSE falls by 14.25\%, with descriptive seven-day-block interval
+[$-0.8294$, $-0.2373$]~\ug\ for corrected minus control.
+High-concentration MAE falls by 27.24\% to 10.2219~\ug, but 213 of 216
+high readings remain underpredicted. Same-day regional information improves
+reconstruction without demonstrating that U-Net has learned finer hotspots.
 
 The findings justify a bounded conclusion about this implementation and
 benchmark, not a claim of general U-Net superiority, state-of-the-art
 performance, operational forecasting or validated accuracy throughout every
-grid cell. The next substantive evaluation should combine an untouched time
+grid cell. The original hybrid remains the official configuration; the wind
+feature needs correction and a separately audited comparison before promotion.
+The next substantive evaluation should combine an untouched time
 period, spatially blocked assessment, issue-time-available covariates and
 out-of-fold residual baselines. Those are proposed experiments and are not
 reported as completed work.
@@ -780,6 +980,9 @@ references identify the original sources; Breathe API access requires an
 appropriate key. Project code and curated result reports are maintained in
 \href{https://github.com/r9jdp/Aitken}{the Aitken repository}; the temporal
 experiment and aggregate audit are identified in \citet{aitkentemporal2026}.
+The AURN import, reproduced selection/correction and verification boundaries
+are documented in \citet{aitkenaurn2026}; supplied prediction archives remain
+local rather than being represented as public neural checkpoints.
 The maintained manuscript source is in \texttt{research\_paper} within that
 repository. No archived data DOI or unrestricted raw-data redistribution
 licence is claimed. Provider terms and data access remain separate from code
@@ -819,6 +1022,21 @@ provenance without requiring the large original artifacts. Neither mode
 retrains models. The seven-day temporal interval is transcribed from the
 versioned report; it is not substituted for the original day-level intervals.
 
+The AURN reproduction reads the two supplied
+\nolinkurl{B_temporal_predictions.csv.gz} tables under
+\nolinkurl{artifacts/temporal_tail_correction_20260912/}, and the separate
+\nolinkurl{data/external_features/aurn/} inputs. The audit script
+\nolinkurl{scripts/reproduce_aurn_supplement.py} preserves the supplied records
+and writes separate local results under
+\nolinkurl{artifacts/aurn_reproduction_20260930/}. Curated checksums, observation
+identity checks and reproduced scores are versioned under
+\nolinkurl{comparison/aurn_import_20260930/}. The manuscript's
+\nolinkurl{evidence/aurn_provenance.json} records the inputs used to regenerate
+its regional-correction tables and daily-mean figure. No HGB or U-Net model
+was retrained for this reproduction; only the small Ridge selection/refit was
+repeated. The AURN interval, unlike the earlier original/temporal intervals,
+was independently recomputed from predictions.
+
 The handoff records a Python 3.10.5 environment with PyTorch 2.10.0+cu126,
 scikit-learn 1.7.2, XGBoost 3.1.2 and NumPy 2.2.6. These are recorded project
 environment versions, not a claim that the manuscript independently rebuilt
@@ -841,7 +1059,9 @@ The temporal extension inserts the following ordered channels before HGB:
 \end{enumerate}
 Its separately generated HGB map is channel 72. The table below lists the
 unchanged 66 predictors shared with the original configurations.
+\begingroup
 \footnotesize
+\renewcommand{\arraystretch}{0.85}
 \begin{longtable}{@{}rl@{}}
 \caption{Retained predictor channels in model order.}\label{tab:features}\\
 \toprule
@@ -856,7 +1076,7 @@ Index & Stored feature name (continued) \\
 \endfoot
 \tableinput{tables/feature_names.tex}
 \end{longtable}
-\normalsize
+\endgroup
 
 % Editorial review is supplied separately in REVIEW_AND_CLAIMS.md so that
 % revision questions do not masquerade as scientific results in the paper.

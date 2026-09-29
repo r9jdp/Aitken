@@ -13,6 +13,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 ROOT = Path(__file__).resolve().parent
 BUNDLE = ROOT.parent.parent / 'code' / 'pm25_london_bundle'
@@ -29,10 +30,12 @@ MODELS = {
     'Standalone U-Net (seed 42)': 'Standalone U-Net (seed 42)',
 }
 TEMPORAL = ROOT.parent / 'results' / 'temporal_model_20260912'
+AURN_RUN = ROOT.parent / 'artifacts/aurn_reproduction_20260930'
+AURN_AUDIT = ROOT.parent / 'comparison/aurn_import_20260930/reproduction_audit.json'
 
 
 def temporal_assets():
-    """Transcribe audited aggregates; do not claim a new prediction-level audit."""
+    """Check saved aggregates; additionally verify the supplied temporal arm."""
     metrics_path = TEMPORAL / 'metrics.csv'
     audit_path = TEMPORAL / 'audit.json'
     report_path = TEMPORAL / 'REPORT.md'
@@ -78,6 +81,15 @@ def temporal_assets():
              for label, col in diagnostics]
     (ROOT / 'tables/temporal_diagnostics.tex').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     delta = float(records.loc['B_temporal', 'rmse_ug_m3'] - records.loc['A_current_hybrid', 'rmse_ug_m3'])
+    supplied = ROOT.parent / 'artifacts/temporal_tail_correction_20260912/final/B_temporal_predictions.csv.gz'
+    temporal_recomputed = False
+    if supplied.exists():
+        frame = pd.read_csv(supplied)
+        assert len(frame) == 9619 and not frame.duplicated(['date', 'site_code']).any()
+        y, p = frame.observed_pm25.to_numpy(float), frame.predicted_pm25.to_numpy(float)
+        values = [np.abs(p-y).mean(), np.sqrt(np.mean((p-y)**2)), 1-np.sum((p-y)**2)/np.sum((y-y.mean())**2)]
+        np.testing.assert_allclose(values, records.loc['B_temporal', ['mae_ug_m3', 'rmse_ug_m3', 'r2']], rtol=0, atol=5e-7)
+        temporal_recomputed = True
     provenance = {
         'source_commit': 'ce40d22',
         'sources': {str(p.relative_to(ROOT.parent)): sha(p) for p in (metrics_path, audit_path, report_path)},
@@ -85,13 +97,77 @@ def temporal_assets():
         'temporal_minus_control_rmse': delta,
         'relative_rmse_reduction_percent': -100 * delta / float(records.loc['A_current_hybrid', 'rmse_ug_m3']),
         'saved_seven_day_block_rmse_interval': [-0.0203, -0.0075],
-        'verification': 'Aggregate transcription checked against the saved CSV/audit/report; prior audit metadata checked. Temporal predictions and checkpoints unavailable locally: no new row-level or checkpoint verification claimed.',
-        'temporal_metrics_recomputed_from_predictions_this_revision': False,
+        'verification': 'Matched-pair aggregates and prior audit metadata checked. Supplied temporal-arm predictions additionally checked when present; matched non-temporal predictions/checkpoints remain unavailable. No new old-pair bootstrap or neural retraining.',
+        'temporal_metrics_recomputed_from_predictions_this_revision': temporal_recomputed,
+        'supplied_temporal_predictions_sha256': sha(supplied) if temporal_recomputed else None,
         'bootstrap_rerun': False, 'models_retrained': False,
         'model_status': 'Experimental; missed 2023 normal-range bias guard. Original official model unchanged.',
     }
     (ROOT / 'evidence/temporal_provenance.json').write_text(json.dumps(provenance, indent=2) + '\n', encoding='utf-8')
     return records, names
+
+
+def aurn_assets():
+    """Build manuscript assets from locally reproduced, unchanged-row results."""
+    predictions_path = AURN_RUN / 'aurn_same_day_2024_predictions.csv.gz'
+    summary_path = AURN_RUN / 'summary.json'
+    audit = json.loads(AURN_AUDIT.read_text())
+    summary = json.loads(summary_path.read_text())
+    assert audit['performance_correction_reproduced']
+    assert audit['original_data_and_supplied_records_unchanged']
+    assert audit['benchmark_rows']['observations_exactly_match_original_float32']
+    d = pd.read_csv(predictions_path, parse_dates=['date'])
+    assert len(d) == 9619 and d.date.nunique() == 349
+    assert not d.duplicated(['date', 'site_code']).any()
+    y = d.observed_pm25.to_numpy(float)
+    values = {}
+    for name, column in [('control', 'control_pm25'), ('corrected', 'predicted_pm25')]:
+        e = d[column].to_numpy(float)-y
+        values[name] = {'n': len(d), 'mae': float(abs(e).mean()), 'rmse': float(np.sqrt(np.mean(e**2))),
+                        'r2': float(1-np.sum(e**2)/np.sum((y-y.mean())**2)), 'bias': float(e.mean())}
+        for metric, value in values[name].items():
+            np.testing.assert_allclose(value, audit[name][metric], rtol=0, atol=1e-9)
+    expected = [2.1343, 3.2309, .6471]
+    assert [round(values['corrected'][k], 4) for k in ('mae', 'rmse', 'r2')] == expected
+    numbers = [r'\textbf{' + f"{values['corrected'][k]:.4f}" + '}' for k in ('mae', 'rmse', 'r2')]
+    (ROOT / 'tables/aurn_results.tex').write_text('Temporal hybrid + AURN correction & ' + ' & '.join(numbers) + r' \\' + '\n', encoding='utf-8')
+    records = [summary['control'], summary['sources']['aurn_same_day']['metrics']]
+    diagnostics = [('Overall signed bias', [r['bias'] for r in records])]
+    for label, key in [('MAE, observed $<15$', 'normal_below_15'),
+                       ('MAE, observed $15\\leq y<25$', 'elevated_15_to_25'),
+                       ('MAE, observed $\\geq25$', 'high_at_least_25')]:
+        diagnostics.append((label, [r['bands'][key]['mae'] for r in records]))
+    diagnostics.append(('Bias, observed $\\geq25$', [r['bands']['high_at_least_25']['bias'] for r in records]))
+    lines = [label + ' & ' + ' & '.join(f'{v:.4f}' for v in vals) + r' \\' for label, vals in diagnostics]
+    (ROOT / 'tables/aurn_diagnostics.tex').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    daily = d.groupby('date')[['observed_pm25', 'control_pm25', 'predicted_pm25']].mean()
+    plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 9,
+                         'axes.spines.top': False, 'axes.spines.right': False, 'pdf.fonttype': 42})
+    fig, axes = plt.subplots(2, 1, figsize=(9, 4.8), constrained_layout=True)
+    for ax, frame, title in [(axes[0], daily, '2024 available LAQN station means'),
+                              (axes[1], daily.loc['2024-03-06':'2024-03-16'], 'March episode: large errors persist')]:
+        for col, label, colour in [('observed_pm25', 'Observed', '#30343b'),
+                                   ('control_pm25', 'Temporal hybrid', '#b77832'),
+                                   ('predicted_pm25', 'With same-day AURN', '#11747b')]:
+            ax.plot(frame.index, frame[col], label=label, color=colour, lw=1.2,
+                    marker='o' if ax == axes[1] else None, markersize=3)
+        ax.set_title(title, loc='left', fontsize=10)
+        ax.set_ylabel('Mean PM₂.₅ (µg/m³)')
+        ax.set_ylim(bottom=0)
+        ax.grid(axis='y', color='#e5e5e5', lw=.5)
+    axes[0].legend(loc='upper right', frameon=False, fontsize=8, ncol=3)
+    axes[0].xaxis.set_major_locator(mdates.MonthLocator(interval=2))
+    axes[0].xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+    axes[1].xaxis.set_major_formatter(mdates.DateFormatter('%d %b'))
+    savefig(fig, 'aurn_timeseries')
+    manifest = {'verification': 'Local AURN correction reproduced from supplied temporal predictions; upstream neural outputs not regenerated.',
+                'sources': {str(p.relative_to(ROOT.parent)): sha(p) for p in [predictions_path, summary_path, AURN_AUDIT]},
+                'metrics': values, 'station_days': len(d), 'labelled_dates': int(d.date.nunique()),
+                'paired_seven_day_interval': audit['independent_7day_5000_bootstrap_ci95'],
+                'bootstrap_recomputed_in_reproduction': True, 'neural_models_retrained': False,
+                'wind_scaling_issue_fixed': False, 'official_model_promoted': False}
+    (ROOT / 'evidence/aurn_provenance.json').write_text(json.dumps(manifest, indent=2)+'\n', encoding='utf-8')
+    return values['corrected'], d
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -115,13 +191,19 @@ def main():
         (ROOT / name).mkdir(exist_ok=True)
     temporal, temporal_names = temporal_assets()
     if args.temporal_only:
-        print('PASS: temporal aggregates, recorded audit metadata and source hashes checked; no retraining or prediction-level re-audit.')
+        print('PASS: temporal evidence checked; available temporal-arm predictions recomputed. No neural retraining or old-pair bootstrap rerun.')
         return
+    aurn, aurn_predictions = aurn_assets()
     d = pd.read_csv(SOURCE)
     assert len(d) == 9619 and d.date.nunique() == 349
     assert not d.duplicated(['date', 'site_code']).any()
     assert d.date.min() == '2024-01-01' and d.date.max() == '2024-12-14'
     y = d.observed_pm25.to_numpy(dtype=float)
+    original_keys = pd.MultiIndex.from_frame(d[['date', 'site_code']])
+    aurn_keys = pd.MultiIndex.from_arrays([aurn_predictions.date.dt.strftime('%Y-%m-%d'), aurn_predictions.site_code])
+    assert set(original_keys) == set(aurn_keys)
+    aurn_y = pd.Series(aurn_predictions.observed_pm25.to_numpy(), index=aurn_keys).reindex(original_keys).to_numpy()
+    np.testing.assert_array_equal(y.astype(np.float32), aurn_y.astype(np.float32))
     assert np.isfinite(d[['observed_pm25', *MODELS]].to_numpy()).all()
     ref = json.loads((ART / 'london_standalone_unet_20260906/metrics.json').read_text())['models']
     rows = []
@@ -169,16 +251,17 @@ def main():
         feature_lines.append(str(i+1)+r' & \texttt{'+escaped+'}'+r' \\')
     (ROOT/'tables/feature_names.tex').write_text('\n'.join(feature_lines)+'\n')
     plt.rcParams.update({'font.family':'DejaVu Sans','font.size':9,'axes.spines.top':False,'axes.spines.right':False,'pdf.fonttype':42})
-    fig,ax=plt.subplots(figsize=(8.0,4.4))
-    labels=[r['model'].replace('--',' + ') for r in rows] + [n.replace(' (3 seeds', '\n(3 seeds') for n in temporal_names]
-    vals=[r['rmse'] for r in rows] + temporal.rmse_ug_m3.tolist()
-    positions = list(range(len(rows))) + [len(rows)+.6, len(rows)+1.6]
-    ax.barh(positions,vals,color=['#166b74']+['#8ca0af']*6+['#ba966a','#8d5a24'],height=.64)
+    fig,ax=plt.subplots(figsize=(8.0,5.0))
+    labels=[r['model'].replace('--',' + ') for r in rows] + [n.replace(' (3 seeds', '\n(3 seeds') for n in temporal_names] + ['Temporal + same-day AURN']
+    vals=[r['rmse'] for r in rows] + temporal.rmse_ug_m3.tolist() + [aurn['rmse']]
+    positions = list(range(len(rows))) + [len(rows)+.6, len(rows)+1.6, len(rows)+3.0]
+    ax.barh(positions,vals,color=['#166b74']+['#8ca0af']*6+['#ba966a','#8d5a24','#16434b'],height=.64)
     ax.axhline(len(rows)-.2, color='#cccccc', lw=.8)
+    ax.axhline(len(rows)+2.3, color='#cccccc', lw=.8)
     ax.set_yticks(positions,labels);ax.invert_yaxis()
     ax.set_xlim(0,4.85);ax.set_xlabel('RMSE (µg/m³); lower is better')
     for pos,v in zip(positions,vals):ax.text(v+.04,pos,f'{v:.4f}',va='center')
-    ax.set_title('Retrospective 2024: 9,619 LAQN station-days\nBottom pair: separate matched temporal experiment',loc='left',pad=12)
+    ax.set_title('Retrospective 2024: 9,619 LAQN station-days\nLast row adds same-day regional measurements',loc='left',pad=12)
     savefig(fig,'rmse_comparison')
     fig,axs=plt.subplots(1,3,figsize=(9,3.05),sharex=True,sharey=True)
     for ax,key,title in zip(axs,['HGB (unconstrained)','Residual U-Net (3-seed)','Standalone U-Net (3-seed)'],['HGB','Hybrid HGB + U-Net','Standalone U-Net ensemble']):
@@ -189,16 +272,19 @@ def main():
     axs[0].set_ylabel('Estimated PM₂.₅ (µg/m³)')
     fig.tight_layout();savefig(fig,'parity')
     # A schematic of implemented operations, not a simulated result.
-    fig,ax=plt.subplots(figsize=(9,3.6));ax.set_axis_off()
-    boxes=[(.02,.58,.25,.31,'Downloaded monitoring\nand environmental\nsource products'),
-           (.37,.58,.25,.31,'Quality control, resampling\n66 predictor channels\nObserved cell targets'),
-           (.72,.70,.26,.19,'HGB / XGBoost / ANN'),
-           (.72,.42,.26,.19,'Standalone U-Net\nDirect estimate; 66 inputs'),
-           (.37,.02,.61,.26,'HGB + residual U-Net: original 67 inputs; temporal 72\nTemporal extension adds 5 past-only history summaries\nAverage 3 corrections; scale by 0.425\nInverse target transform → estimated PM₂.₅')]
+    fig,ax=plt.subplots(figsize=(9,4.6));ax.set_axis_off()
+    boxes=[(.02,.70,.25,.24,'Downloaded monitoring\nand environmental\nsource products'),
+           (.37,.70,.25,.24,'Quality control, resampling\n66 predictor channels\nObserved cell targets'),
+           (.72,.82,.26,.16,'HGB / XGBoost / ANN'),
+           (.72,.58,.26,.17,'Standalone U-Net\nDirect estimate; 66 inputs'),
+           (.37,.29,.61,.20,'HGB + residual U-Net: original 67 inputs; temporal 72\nAverage 3 corrections; scale by 0.425\nInverse target transform → estimated PM₂.₅'),
+           (.02,.02,.25,.19,'Same-day regional AURN\n4 daily correction inputs'),
+           (.37,.02,.61,.19,'Ridge correction fitted to 2023 daily residuals\nGated daily adjustment added in concentration units')]
     for x,y0,w,h,label in boxes:
         ax.add_patch(plt.Rectangle((x,y0),w,h,fc='#eef4f5',ec='#3f6976',lw=1))
         ax.text(x+w/2,y0+h/2,label,ha='center',va='center',fontsize=9)
-    for start,end in [((.27,.735),(.37,.735)),((.62,.79),(.72,.79)),((.62,.64),(.72,.515)),((.495,.58),(.495,.28))]:
+    for start,end in [((.27,.82),(.37,.82)),((.62,.90),(.72,.90)),((.62,.74),(.72,.665)),
+                      ((.495,.70),(.495,.49)),((.65,.29),(.65,.21)),((.27,.115),(.37,.115))]:
         ax.annotate('',xy=end,xytext=start,arrowprops={'arrowstyle':'->','color':'#3f6976'})
     ax.set(xlim=(0,1),ylim=(0,1));savefig(fig,'pipeline')
     # Record exactly which source bytes support this paper; no claim of public release.
